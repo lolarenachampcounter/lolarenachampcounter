@@ -5,31 +5,45 @@ const counter = document.getElementById("counter");
 const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
 const LANG_KEY = "lol-lang";
-
-let currentLang =
-  localStorage.getItem(LANG_KEY) ||
-  (navigator.language.startsWith("es") ? "es" : "en");
+const importModal = document.getElementById("importModal");
+const modalText = document.getElementById("modalText");
+const closeModal = document.getElementById("closeModal");
+const replaceBtn = document.getElementById("replaceBtn");
+const addBtn = document.getElementById("addBtn");
 
 const translations = {
   es: {
-    title: "Victorias por Campeón",
+    title: "Campeones con victoria",
     searchPlaceholder: "Buscar campeón...",
+    completed: "Completados",
+    export: "Exportar progreso",
+    import: "Importar progreso",
     filterAll: "Todos",
     filterWon: "Con victoria",
     filterNotWon: "Sin victoria",
-    completed: "Completados",
-    donate: "Donar"
+    donate: "Buy me a coffee",
+    // AGREGA ESTAS LÍNEAS:
+    importReplaceOrAdd: "¿Quieres sustituir tu progreso actual o añadir los nuevos campeones?",
+    replace: "Sustituir",
+    add: "Añadir"
   },
   en: {
-    title: "Champion Wins",
+    title: "Champions with victory",
     searchPlaceholder: "Search champion...",
+    completed: "Completed",
+    export: "Export progress",
+    import: "Import progress",
     filterAll: "All",
     filterWon: "Won",
     filterNotWon: "Not won",
-    completed: "Completed",
-    donate: "Donate"
+    donate: "Buy me a coffee",
+    // AGREGA ESTAS LÍNEAS:
+    importReplaceOrAdd: "Do you want to replace your current progress or add to it?",
+    replace: "Replace",
+    add: "Add"
   }
 };
+let currentLang =  "en";
 
 
 const STORAGE_KEY = "lol-wins";
@@ -55,6 +69,28 @@ async function loadChampions() {
   }));
 
   render();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  render();           // Render de campeones
+  applyLanguage();    // Traducciones
+});
+
+function openImportModal(winsArray) {
+  modalText.textContent = translations[currentLang].importReplaceOrAdd;
+  replaceBtn.textContent = translations[currentLang].replace || "Sustituir";
+  addBtn.textContent = translations[currentLang].add || "Añadir";
+  importModal.style.display = "flex";
+
+  replaceBtn.onclick = () => {
+    wins = new Set(winsArray);
+    finishImport();
+  };
+
+  addBtn.onclick = () => {
+    winsArray.forEach(c => wins.add(c));
+    finishImport();
+  };
 }
 
 function saveWins() {
@@ -129,4 +165,100 @@ searchInput.addEventListener("input", render);
 filterRadios.forEach(radio => radio.addEventListener("change", render));
 
 loadChampions();
+function applyLanguage() {
+  const t = translations[currentLang];
 
+  // Título
+  document.querySelector("h1").textContent = t.title;
+
+  // Placeholder buscador
+  const searchInput = document.getElementById("searchInput");
+  searchInput.placeholder = t.searchPlaceholder;
+
+  // Contador
+  const counter = document.getElementById("counter");
+  counter.textContent = `${t.completed}: ${wins.size}`;
+
+  // Botones Export / Import
+  const exportBtn = document.getElementById("exportBtn");
+  exportBtn.textContent = t.export;
+
+  const importLabel = document.querySelector(".import-btn");
+  importLabel.childNodes[0].textContent = t.import;
+
+  // Filtros
+  document.querySelector('input[value="all"]').parentNode.lastChild.textContent = " " + t.filterAll;
+  document.querySelector('input[value="won"]').parentNode.lastChild.textContent = " " + t.filterWon;
+  document.querySelector('input[value="not-won"]').parentNode.lastChild.textContent = " " + t.filterNotWon;
+
+  // Tipjar
+  document.querySelector(".tipjar").textContent = "☕ " + t.donate;
+
+  // Banderas: resaltar activa
+  document.querySelectorAll(".lang-flag").forEach(flag => {
+    flag.classList.toggle("active", flag.dataset.lang === currentLang);
+  });
+}
+
+
+document.querySelectorAll(".lang-flag").forEach(flag => {
+  flag.addEventListener("click", () => {
+    currentLang = flag.dataset.lang;
+    localStorage.setItem("lang", currentLang);
+    applyLanguage();
+  });
+});
+
+
+
+importInput.addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+
+      // Soporte para array directo o { wins: [...] }
+      let winsArray = Array.isArray(data) ? data : data.wins;
+
+      // Validación flexible: array de strings o números (IDs)
+      if (!Array.isArray(winsArray)) throw new Error("Formato incorrecto");
+      winsArray = winsArray.map(String); // Convertir todo a string
+
+      // Abrir modal de añadir/sustituir
+      openImportModal(winsArray);
+
+    } catch (err) {
+      alert("Archivo inválido: asegúrate de que es un JSON correcto de la app");
+      console.error(err);
+    }
+  };
+
+  reader.readAsText(file);
+});
+
+function finishImport() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...wins])); 
+
+  document.getElementById("counter").textContent = `${translations[currentLang].completed}: ${wins.size}`;
+  
+  render();
+  importModal.style.display = "none";
+  
+  // Limpiar el input para permitir importar el mismo archivo dos veces si fuera necesario
+  importInput.value = ""; 
+}
+closeModal.addEventListener("click", () => {
+  importModal.style.display = "none";
+});
+
+window.onclick = (event) => {
+  if (event.target == importModal) {
+    importModal.style.display = "none";
+  }
+};
+
+applyLanguage();

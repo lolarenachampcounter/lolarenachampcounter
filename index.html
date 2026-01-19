@@ -2,65 +2,90 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>LoL Win Tracker</title>
+  <title> Arena LoL Win Tracker</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="assets/ini.png" />
+
 </head>
-<body>
-  <header>
-    <h1>Victorias por Campeón</h1>
-    <div id="counter" class="counter">
-      Completados: 0
-    </div>
+<body class="base">
+  <header class="header">
+  <div class="header-left">
+    <h1>Campeones con victoria</h1>
+
+    <div id="counter" class="counter">Completados: 0</div>
+
     <input
       type="text"
       id="searchInput"
       placeholder="Buscar campeón..."
+      style = "width: 120%;"
     />
 
     <div class="import-export">
-  <button id="exportBtn">Exportar progreso</button>
-
-  <label class="import-btn">
-    Importar progreso
-    <input type="file" id="importInput" accept=".json" hidden />
-  </label>
-</div>
+      <button id="exportBtn">Exportar progreso</button>
+      <label class="import-btn">
+        Importar progreso
+        <input type="file" id="importInput" accept=".json" hidden />
+      </label>
+    </div>
 
     <div class="filters">
-      <label>
-        <input type="radio" name="filter" value="all" checked />
-        Todos
-      </label>
-      <label>
-        <input type="radio" name="filter" value="won" />
-        Con victoria
-      </label>
-      <label>
-        <input type="radio" name="filter" value="not-won" />
-        Sin victoria
-      </label>
+      <label><input type="radio" name="filter" value="all" checked /> Todos</label>
+      <label><input type="radio" name="filter" value="won" /> Con victoria</label>
+      <label><input type="radio" name="filter" value="not-won" /> Sin victoria</label>
     </div>
-    <div class="header-right">
-      <div class="lang-switch">
-    <button data-lang="es">ES</button>
-    <button data-lang="en">EN</button>
-  </div>hj
-    <div class="tipjar">
+  </div>
+
+  <div class="header-right">
+      <div class="tip-lang">
+
+       <div class="tipjar">
       <a
-        href="https://paypal.me/dolm0s"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        ☕ Buy me a coffee
-      </a>
+  href="https://paypal.me/dolm0s"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="tipjar"
+>☕ Buy me a coffee</a>
     </div>
-  </header>
+    <div class="lang-switch">
+      <img
+        src="https://flagcdn.com/w20/es.png"
+        alt="Español"
+        data-lang="es"
+        title="Español"
+        class="lang-flag"
+      />
+      <img
+        src="https://flagcdn.com/w20/gb.png"
+        alt="English"
+        data-lang="en"
+        title="English"
+        class="lang-flag"
+      />
+    </div>
+  </div>
+  </div>
+</header>
+
 
   <main>
     <div id="championsGrid" class="grid"></div>
   </main>
 
+
+<div id="importModal" class="modal">
+  <div class="modal-content">
+    <span id="closeModal" class="close">&times;</span>
+    <p id="modalText"></p>
+    <div class="modal-buttons">
+      <button id="replaceBtn"></button>
+      <button id="addBtn"></button>
+    </div>
+  </div>
+</div>
+
   <script src="app.js"></script>
+
 </body>
 </html>
 
