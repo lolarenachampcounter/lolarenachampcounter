@@ -11,6 +11,8 @@ const closeModal = document.getElementById("closeModal");
 const replaceBtn = document.getElementById("replaceBtn");
 const addBtn = document.getElementById("addBtn");
 const sortSelect = document.getElementById("sortSelect");
+const SORT_KEY = "lol-sort";
+
 
 const translations = {
   es: {
@@ -151,6 +153,10 @@ function render() {
   const search = searchInput.value.toLowerCase();
   const filter = getActiveFilter();
   const sortOption = sortSelect.value;
+  const savedSort = localStorage.getItem(SORT_KEY);
+if (savedSort) {
+  sortSelect.value = savedSort;
+}
 
   // 1️⃣ Filtrar campeones
   let filteredChamps = champions
@@ -300,3 +306,21 @@ if (importBtn) {
     importInput.click(); // Esto abre la ventana de selección de archivo
   });
 }
+
+const clearSearchBtn = document.getElementById("clearSearch");
+
+searchInput.addEventListener("input", () => {
+  clearSearchBtn.style.display = searchInput.value ? "block" : "none";
+  render();
+});
+
+clearSearchBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  clearSearchBtn.style.display = "none";
+  render();
+});
+
+sortSelect.addEventListener("change", () => {
+  localStorage.setItem(SORT_KEY, sortSelect.value);
+  render();
+});
